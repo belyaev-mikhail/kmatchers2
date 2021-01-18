@@ -48,11 +48,6 @@ fun simplify(e: Expr): Expr = match(e) with {
     otherwise { e }
 }
 
-fun join(c: Iterable<Expr>) = match(c) with {
-    case(Iterable(_1(), _1(), _1(), rest = _2())) of { _1() }
-
-}
-
 fun fullySimplify(e: Expr): Expr {
     var result = e
     do {
@@ -67,5 +62,17 @@ class SmokeTest {
     fun smokeyTest() {
         assertEquals(Var("x"), fullySimplify(Plus(Var("x"), Const(0))))
         assertEquals(Var("x"), fullySimplify(Plus(Plus(Const(10), Const(-10)), Plus(Var("x"), Const(0)))))
+    }
+
+    fun honourableMentions() {
+        match("Hello") with {
+            // does not compile (error message could be better though)
+            //case(_1() and _2()) of {}
+
+            // does not compile with: type mismatch, required Nothing, found String
+            // case(_1()) or case(_2()) of {}
+
+            otherwise {  }
+        }
     }
 }
