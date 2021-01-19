@@ -46,82 +46,41 @@ inline fun <
 
 fun any(): NoResultPattern<Any?> = NoResultPattern { _, _ -> true }
 
+private inline fun <T> compareOrSetComponent(value: T, option: Option<T>,
+                                             setter: (newOption: Option<T>) -> Unit): Boolean =
+    when {
+        option.isNotEmpty() -> value == option.get()
+        else -> { setter(Option.just(value)); true }
+    }
+
 fun <T> _1(): Pattern<T, ε, ε, ε, ε, ε, T> = Pattern { value, matchResult ->
     matchResult as MatchResult.Builder
-    when {
-        matchResult.v1.isNotEmpty() -> {
-            matchResult.v1.get() == value
-        }
-        else -> {
-            matchResult.v1 = Option.just(value)
-            true
-        }
-    }
+    compareOrSetComponent(value, matchResult.v1) { matchResult.v1 = it }
 }
 
 fun <T> _2(): Pattern<ε, T, ε, ε, ε, ε, T> = Pattern { value, matchResult ->
     matchResult as MatchResult.Builder
-    when {
-        matchResult.v2.isNotEmpty() -> {
-            matchResult.v2.get() == value
-        }
-        else -> {
-            matchResult.v2 = Option.just(value)
-            true
-        }
-    }
+    compareOrSetComponent(value, matchResult.v2) { matchResult.v2 = it }
 }
 
 fun <T> _3(): Pattern<ε, ε, T, ε, ε, ε, T> = Pattern { value, matchResult ->
     matchResult as MatchResult.Builder
-    when {
-        matchResult.v3.isNotEmpty() -> {
-            matchResult.v3.get() == value
-        }
-        else -> {
-            matchResult.v3 = Option.just(value)
-            true
-        }
-    }
+    compareOrSetComponent(value, matchResult.v3) { matchResult.v3 = it }
 }
 
 fun <T> _4(): Pattern<ε, ε, ε, T, ε, ε, T> = Pattern { value, matchResult ->
     matchResult as MatchResult.Builder
-    when {
-        matchResult.v4.isNotEmpty() -> {
-            matchResult.v4.get() == value
-        }
-        else -> {
-            matchResult.v4 = Option.just(value)
-            true
-        }
-    }
+    compareOrSetComponent(value, matchResult.v4) { matchResult.v4 = it }
 }
 
 fun <T> _5(): Pattern<ε, ε, ε, ε, T, ε, T> = Pattern { value, matchResult ->
     matchResult as MatchResult.Builder
-    when {
-        matchResult.v5.isNotEmpty() -> {
-            matchResult.v5.get() == value
-        }
-        else -> {
-            matchResult.v5 = Option.just(value)
-            true
-        }
-    }
+    compareOrSetComponent(value, matchResult.v5) { matchResult.v5 = it }
 }
 
 fun <T> _6(): Pattern<ε, ε, ε, ε, ε, T, T> = Pattern { value, matchResult ->
     matchResult as MatchResult.Builder
-    when {
-        matchResult.v6.isNotEmpty() -> {
-            matchResult.v6.get() == value
-        }
-        else -> {
-            matchResult.v6 = Option.just(value)
-            true
-        }
-    }
+    compareOrSetComponent(value, matchResult.v6) { matchResult.v6 = it }
 }
 
 fun <T> const(arg: T): NoResultPattern<T> = Pattern { value, _ -> value == arg }
