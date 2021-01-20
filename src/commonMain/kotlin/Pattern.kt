@@ -2,12 +2,61 @@ package ru.spbstu.matchers.rewrite
 
 import kotlinx.warnings.Warnings
 import ru.spbstu.wheels.Option
+import ru.spbstu.wheels.getOrElse
 
 fun interface Pattern<out T1, out T2, out T3, out T4, out T5, out T6, in Arg> {
     fun unapply(
         value: Arg,
         matchResult: MatchResult<@UV T1, @UV T2, @UV T3, @UV T4, @UV T5, @UV T6>
     ): Boolean
+
+    companion object {
+        abstract class View<Arg, Res> {
+            abstract operator fun <T1, T2, T3, T4, T5, T6> invoke(res: Pattern<T1, T2, T3, T4, T5, T6, Res>):
+                    Pattern<T1, T2, T3, T4, T5, T6, Arg>
+        }
+        inline fun <Arg, Res> view(
+            crossinline body: (Arg) -> Res
+        ): View<Arg, Res> = object : View<Arg, Res>() {
+            override fun <T1, T2, T3, T4, T5, T6> invoke(
+                res: Pattern<T1, T2, T3, T4, T5, T6, Res>
+            ): Pattern<T1, T2, T3, T4, T5, T6, Arg> = res.contraMap(body)
+        }
+        inline fun <Arg, Res> viewOrFail(
+            crossinline body: (Arg) -> Option<Res>
+        ): View<Arg, Res> = object : View<Arg, Res>() {
+            override fun <T1, T2, T3, T4, T5, T6> invoke(
+                res: Pattern<T1, T2, T3, T4, T5, T6, Res>
+            ): Pattern<T1, T2, T3, T4, T5, T6, Arg> = Pattern { value, matchResult ->
+                val trye = body(value).getOrElse { return@Pattern false }
+                res.unapply(trye, matchResult)
+            }
+        }
+
+        abstract class ViewMany<Arg, Res> {
+            abstract operator fun <T1, T2, T3, T4, T5, T6> invoke(vararg res: Pattern<T1, T2, T3, T4, T5, T6, Res>):
+                    Pattern<T1, T2, T3, T4, T5, T6, Arg>
+        }
+        inline fun <Arg, Res> viewMany(
+            crossinline body: (Arg) -> Iterable<Res>
+        ): ViewMany<Arg, Res> = object : ViewMany<Arg, Res>() {
+            override fun <T1, T2, T3, T4, T5, T6> invoke(
+                vararg res: Pattern<T1, T2, T3, T4, T5, T6, Res>
+            ): Pattern<T1, T2, T3, T4, T5, T6, Arg> = Pattern { value, matchResult ->
+                val valIt = body(value).iterator()
+                val pIt = res.iterator()
+                while (pIt.hasNext() && valIt.hasNext()) {
+                    if (!pIt.next().unapply(valIt.next(), matchResult)) return@Pattern false
+                }
+                if (pIt.hasNext() || valIt.hasNext()) return@Pattern false
+                true
+            }
+        }
+
+        inline fun <T> simple(
+            crossinline body: (T) -> Boolean
+        ): NoResultPattern<T> = Pattern { value, _ -> body(value) }
+    }
 }
 
 inline fun <
@@ -120,3 +169,4 @@ infix fun <T1, T2, T3, T4, T5, T6, Arg> NotNull.and(that: Pattern<T1, T2, T3, T4
         @Suppress(Warnings.UNCHECKED_CAST)
         value != null && that.unapply(value as Arg, matchResult)
     }
+

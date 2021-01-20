@@ -1,6 +1,10 @@
 package ru.spbstu.matchers.rewrite
 
 import kotlinx.warnings.Warnings
+import ru.spbstu.wheels.getOption
+import ru.spbstu.wheels.getOrElse
+
+import org.intellij.lang.annotations.Language
 
 fun <T1, T2, T3, T4, T5, T6, Arg> Iterable(
     vararg first: Pattern<T1, T2, T3, T4, T5, T6, Arg>,
@@ -28,14 +32,14 @@ fun <T1, T2, T3, T4, T5, T6, Arg> Collection(
 }
 
 fun <T1, T2, T3, T4, T5, T6, A, B> Pair(
-    first: Pattern<T1, T2, T3, T4, T5, T6, A>,
-    second: Pattern<T1, T2, T3, T4, T5, T6, B>
+    first: Pattern<T1, T2, T3, T4, T5, T6, A> = any(),
+    second: Pattern<T1, T2, T3, T4, T5, T6, B> = any()
 ): Pattern<T1, T2, T3, T4, T5, T6, Pair<A, B>> = first.divideWith(second, { it.first }, { it.second })
 
 fun <T1, T2, T3, T4, T5, T6, A, B, C> Triple(
-    first: Pattern<T1, T2, T3, T4, T5, T6, A>,
-    second: Pattern<T1, T2, T3, T4, T5, T6, B>,
-    third: Pattern<T1, T2, T3, T4, T5, T6, C>
+    first: Pattern<T1, T2, T3, T4, T5, T6, A> = any(),
+    second: Pattern<T1, T2, T3, T4, T5, T6, B> = any(),
+    third: Pattern<T1, T2, T3, T4, T5, T6, C> = any()
 ): Pattern<T1, T2, T3, T4, T5, T6, Triple<A, B, C>> =
     Pattern { value, matchResult ->
         first.unapply(value.first, matchResult) &&
@@ -50,8 +54,14 @@ fun <T1, T2, T3, T4, T5, T6, K, V> mapContaining(
         var res = true
         for ((k, p) in entries) {
             @Suppress(Warnings.UNCHECKED_CAST)
-            val v = value[k] ?: if (k in value) (null as V) else return@Pattern false
+            val v = value.getOption(k).getOrElse { return@Pattern false }
             res = res && p.unapply(v, matchResult)
         }
         res
     }
+
+fun Pattern.Companion.regex(
+    @Language("regexp") re: String
+) = viewMany<CharSequence, String> { cs ->
+    Regex(re).matchEntire(cs)?.groupValues?.let { it.subList(1, it.size) } ?: emptyList()
+}

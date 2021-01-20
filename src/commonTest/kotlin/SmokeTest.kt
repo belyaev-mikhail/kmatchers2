@@ -1,36 +1,9 @@
 package ru.spbstu.matchers
 
 import ru.spbstu.matchers.rewrite.*
+import ru.spbstu.wheels.Option
 import kotlin.test.Test
-
-import ru.spbstu.matchers.rewrite.Iterable
 import kotlin.test.assertEquals
-
-sealed class Expr
-data class Const(val value: Int) : Expr()
-data class Var(val name: String) : Expr()
-data class Plus(val lhv: Expr, val rhv: Expr) : Expr()
-
-fun <T1, T2, T3, T4, T5, T6> Const(
-    value: Pattern<T1, T2, T3, T4, T5, T6, Int>
-): Pattern<T1, T2, T3, T4, T5, T6, Expr> = Pattern { v, matchResult ->
-    v is Const && value.unapply(v.value, matchResult)
-}
-
-fun <T1, T2, T3, T4, T5, T6> Var(
-    name: Pattern<T1, T2, T3, T4, T5, T6, String>
-): Pattern<T1, T2, T3, T4, T5, T6, Expr> = Pattern { value, matchResult ->
-    value is Var && name.unapply(value.name, matchResult)
-}
-
-fun <T1, T2, T3, T4, T5, T6> Plus(
-    lhv: Pattern<T1, T2, T3, T4, T5, T6, Expr>,
-    rhv: Pattern<T1, T2, T3, T4, T5, T6, Expr>
-): Pattern<T1, T2, T3, T4, T5, T6, Expr> = Pattern { value, matchResult ->
-    value is Plus &&
-            lhv.unapply(value.lhv, matchResult) &&
-            rhv.unapply(value.rhv, matchResult)
-}
 
 fun simplify(e: Expr): Expr = match(e) with {
     case(Plus(Const(_1()), Const(_2()))) of {
@@ -59,9 +32,34 @@ fun fullySimplify(e: Expr): Expr {
 
 class SmokeTest {
     @Test
-    fun smokeyTest() {
+    fun complexTest() {
         assertEquals(Var("x"), fullySimplify(Plus(Var("x"), Const(0))))
         assertEquals(Var("x"), fullySimplify(Plus(Plus(Const(10), Const(-10)), Plus(Var("x"), Const(0)))))
+    }
+
+    @Test
+    fun views() {
+        val intString = Pattern.viewOrFail { it: String -> Option.ofNullable(it.toIntOrNull()) }
+        val positive = Pattern.simple { it: Int -> it > 0 }
+        match("1") with {
+            case(intString(positive)) of {
+
+            }
+        }
+    }
+
+    @Test
+    fun regex() {
+        val intString = Pattern.viewOrFail { it: String -> Option.ofNullable(it.toIntOrNull()) }
+        val assignment = Pattern.regex("(\\d+) = (\\d+)")
+        val three = match("1 = 2") with {
+            case(assignment(intString(_1()), intString(_2()))) of {
+                _1() + _2()
+            }
+            otherwise { -1 }
+        }
+
+        assertEquals(3, three)
     }
 
     fun honourableMentions() {

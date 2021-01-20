@@ -1,5 +1,6 @@
 package ru.spbstu.matchers.rewrite
 
+import kotlinx.warnings.Warnings
 import ru.spbstu.wheels.Option
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -38,11 +39,32 @@ class MatchScope<T>(@PublishedApi internal val value: T) {
     }
 
     @OptIn(ExperimentalTypeInference::class)
-    infix fun <R> with(@BuilderInference body: MatchWithScope<R>.() -> Unit): R =
+    inline infix fun <R> with(@BuilderInference body: MatchWithScope<R>.() -> Unit): R =
         MatchWithScope<R>().apply(body).result.get()
 }
 
 @OptIn(ExperimentalTypeInference::class)
 fun <T> match(value: T) = MatchScope(value)
 
+fun <T1, T2, T3, T4, T5, T6, T> match(
+    value: T,
+    case: Case<T1, T2, T3, T4, T5, T6, T>
+): MatchResult<T1, T2, T3, T4, T5, T6>? = case(value)
+
+fun <T1, T2, T3, T4, T5, T6, T> match(
+    value: T,
+    pattern: Pattern<T1, T2, T3, T4, T5, T6, T>
+): MatchResult<T1, T2, T3, T4, T5, T6>? = match(value, case(pattern))
+
+fun <T1, T2, T3, T4, T5, T6, T> matchForced(
+    value: T,
+    case: Case<T1, T2, T3, T4, T5, T6, T>
+): MatchResult<T1, T2, T3, T4, T5, T6> =
+    case(value) ?: throw IllegalArgumentException("Case not matched to value \"$value\"")
+
+fun <T1, T2, T3, T4, T5, T6, T> matchForced(
+    value: T,
+    pattern: Pattern<T1, T2, T3, T4, T5, T6, T>
+): MatchResult<T1, T2, T3, T4, T5, T6> =
+    matchForced(value, case(pattern))
 
