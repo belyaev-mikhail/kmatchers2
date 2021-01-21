@@ -44,17 +44,50 @@ class StdLibTest {
 
     @Test
     fun testIterable() {
-        var visits = 0
-        match((1..30)) with {
-            case(Iterable(_1(), _2(), _3(), rest = _4())) of {
-                ++visits
-                assertEquals(1, _1())
-                assertEquals(2, _2())
-                assertEquals(3, _3())
-                assertEquals((4..30).toList(), _4().toList())
+        run {
+            var visits = 0
+            match((1..30)) with {
+                case(Iterable(_1(), _2(), _3(), rest = _4())) of {
+                    ++visits
+                    assertEquals(1, _1())
+                    assertEquals(2, _2())
+                    assertEquals(3, _3())
+                    assertEquals((4..30).toList(), _4().toList())
+                }
+                otherwise {  }
             }
-            otherwise {  }
+            assertEquals(1, visits)
         }
-        assertEquals(1, visits)
+
+        run {
+            var visits = 0
+            match((0..15).toList()) with {
+                case(Collection(_1(), _2(), _3())) of {
+                    fail()
+                }
+                case(Collection(_1(), rest = _2(), size = _3())) of {
+                    ++visits
+                    assertEquals(0, _1())
+                    assertEquals((1..15).toList(), _2().toList())
+                    assertEquals(16, _3())
+                }
+                otherwise { fail() }
+            }
+            assertEquals(1, visits)
+        }
+    }
+
+    @Test
+    fun testResult() {
+        // due to Result bugs this does not work =(
+//        val res = kotlin.runCatching { 2 }
+//        val recheck = match(res) with {
+//            case(Result.successPattern(_1())) of {
+//                _1()
+//            }
+//        }
+//        assertEquals(2, recheck)
+
+
     }
 }
