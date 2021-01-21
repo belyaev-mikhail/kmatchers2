@@ -30,21 +30,6 @@ sealed class MatchResult<out T1, out T2, out T3, out T4, out T5, out T6> {
         override fun _5(): T5 = v5.getOrElse { throwNoElement(5) }
         override fun _6(): T6 = v6.getOrElse { throwNoElement(6) }
 
-        fun assign(that: Builder<
-                @UV T1, @UV T2,
-                @UV T3, @UV T4,
-                @UV T5, @UV T6>
-        ) {
-            v1 = that.v1
-            v2 = that.v2
-            v3 = that.v3
-            v4 = that.v4
-            v5 = that.v5
-            v6 = that.v6
-        }
-
-        fun copy() = Builder<T1, T2, T3, T4, T5, T6>().assign(this)
-
         private fun <T> StringBuilder.appendElement(element: Option<T>): StringBuilder {
             if (element.isEmpty()) append("<NO VALUE>")
             else append(element.get())

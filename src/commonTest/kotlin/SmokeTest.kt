@@ -40,7 +40,7 @@ class SmokeTest {
     @Test
     fun views() {
         val intString = Pattern.viewOrFail { it: String -> Option.ofNullable(it.toIntOrNull()) }
-        val positive = Pattern.simple { it: Int -> it > 0 }
+        val positive = Pattern.simple<Int> { it > 0 }
         match("1") with {
             case(intString(positive)) of {
 
@@ -61,6 +61,8 @@ class SmokeTest {
 
         assertEquals(3, three)
     }
+
+
 
     fun honourableMentions() {
         match("Hello") with {

@@ -65,3 +65,17 @@ fun Pattern.Companion.regex(
 ) = viewMany<CharSequence, String> { cs ->
     Regex(re).matchEntire(cs)?.groupValues?.let { it.subList(1, it.size) } ?: emptyList()
 }
+
+fun <T1, T2, T3, T4, T5, T6, T> Result.Companion.success(
+    value: Pattern<T1, T2, T3, T4, T5, T6, T>
+): Pattern<T1, T2, T3, T4, T5, T6, Result<T>> = Pattern { v, matchResult ->
+    v.isSuccess && value.unapply(v.getOrThrow(), matchResult)
+}
+
+fun <T1, T2, T3, T4, T5, T6> Result.Companion.failure(
+    value: Pattern<T1, T2, T3, T4, T5, T6, Throwable>
+): Pattern<T1, T2, T3, T4, T5, T6, Result<Nothing>> = Pattern { v, matchResult ->
+    v.isFailure && value.unapply(v.exceptionOrNull()!!, matchResult)
+}
+
+
