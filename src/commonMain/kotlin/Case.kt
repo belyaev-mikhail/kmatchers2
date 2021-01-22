@@ -35,21 +35,21 @@ internal class OrCase<T1, T2, T3, T4, T5, T6, in Arg>(
     }
 }
 
-infix fun <T1, T2, T3, T4, T5, T6, Arg> Case<T1, T2, T3, T4, T5, T6, Arg>.or(that: Case<T1, T2, T3, T4, T5, T6, Arg>): Case<T1, T2, T3, T4, T5, T6, Arg> =
-    OrCase<T1, T2, T3, T4, T5, T6, Arg>(this, that)
+infix fun <T1, T2, T3, T4, T5, T6, Arg> Case<T1, T2, T3, T4, T5, T6, Arg>.or(
+    that: Case<T1, T2, T3, T4, T5, T6, Arg>
+): Case<T1, T2, T3, T4, T5, T6, Arg> = OrCase(this, that)
 
 internal class NotCase<T1, T2, T3, T4, T5, T6, in Arg>(
     val base: Case<T1, T2, T3, T4, T5, T6, Arg>
-): Case<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Arg>() {
-
-    override fun invoke(arg: Arg): MatchResult<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing>? =
+): Case<ε, ε, ε, ε, ε, ε, Arg>() {
+    override fun invoke(arg: Arg): EmptyResult? =
         when (base(arg)) {
             null -> MatchResult.Builder()
             else -> null
         }
 }
 
-operator fun <T1, T2, T3, T4, T5, T6, Arg> Case<T1, T2, T3, T4, T5, T6, Arg>.not(): Case<Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Arg> =
+operator fun <T1, T2, T3, T4, T5, T6, Arg> Case<T1, T2, T3, T4, T5, T6, Arg>.not(): Case<ε, ε, ε, ε, ε, ε, Arg> =
     NotCase(this)
 
 internal class GuardedCase<T1, T2, T3, T4, T5, T6, in Arg>(
