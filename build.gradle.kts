@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.4.21"
+    kotlin("multiplatform") version "1.5.21"
 }
 
 group = "ru.spbstu"
@@ -7,7 +7,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    maven(url = "https://dl.bintray.com/vorpal-research/kotlin-maven")
+    maven(url = "https://maven.vorpal-research.science")
 }
 
 
@@ -26,8 +26,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("ru.spbstu:kotlinx-warnings:1.4.10")
-                implementation("ru.spbstu:kotlin-wheels:0.0.1.2")
+                implementation("ru.spbstu:kotlinx-warnings:1.5.21")
+                implementation("ru.spbstu:kotlin-wheels:0.0.1.3")
             }
         }
         val commonTest by getting {
